@@ -6,836 +6,22 @@
 <title>PetMatch — Encontre, Recompense, Conecte</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-<style>
-  :root {
-  --bg: #0d0f0e;
-  --surface: #141714;
-  --card: #1a1e1a;
-  --border: #2a2f2a;
-  --green: #3b82f6;        /* azul principal */
-  --green-dim: #2563eb;    /* azul mais escuro */
-  --green-glow: rgba(59,130,246,0.15); /* brilho azul */
-}
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
-
-  /* NOISE TEXTURE */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* NAV */
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 40px;
-    background: rgba(13,15,14,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-    color: var(--green);
-    letter-spacing: -0.5px;
-  }
-
-  .logo span { color: var(--text); }
-
-  nav ul {
-    display: flex;
-    gap: 32px;
-    list-style: none;
-  }
-
-  nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.2s;
-  }
-
-  nav a:hover { color: var(--text); }
-
-  .nav-cta {
-    background: var(--green);
-    color: #0d0f0e !important;
-    padding: 8px 20px;
-    border-radius: 100px;
-    font-weight: 600 !important;
-    transition: transform 0.15s, box-shadow 0.15s !important;
-  }
-
-  .nav-cta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 20px rgba(123,255,106,0.4);
-  }
-
-  /* HERO */
-  .hero {
-    position: relative;
-    min-height: 92vh;
-    display: flex;
-    align-items: center;
-    padding: 80px 40px;
-    overflow: hidden;
-  }
-
-  .hero-glow {
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(123,255,106,0.08) 0%, transparent 70%);
-    top: -100px;
-    right: -100px;
-    pointer-events: none;
-  }
-
-  .hero-glow-2 {
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,184,77,0.05) 0%, transparent 70%);
-    bottom: -50px;
-    left: 200px;
-    pointer-events: none;
-  }
-
-  .hero-content {
-    max-width: 680px;
-    position: relative;
-    z-index: 1;
-    animation: fadeUp 0.8s ease both;
-  }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--green-glow);
-    border: 1px solid rgba(123,255,106,0.25);
-    color: var(--green);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 100px;
-    margin-bottom: 28px;
-  }
-
-  .badge-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s ease infinite;
-  }
-
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(40px, 6vw, 72px);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -2px;
-    margin-bottom: 24px;
-  }
-
-  h1 em {
-    font-style: normal;
-    color: var(--green);
-  }
-
-  .hero p {
-    font-size: 18px;
-    color: var(--muted);
-    max-width: 480px;
-    margin-bottom: 40px;
-    font-weight: 300;
-    line-height: 1.7;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-
-  .btn-primary {
-    background: var(--green);
-    color: #0d0f0e;
-    border: none;
-    padding: 14px 32px;
-    border-radius: 100px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.2s;
-    font-family: 'DM Sans', sans-serif;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(123,255,106,0.35);
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 14px 32px;
-    border-radius: 100px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    font-family: 'DM Sans', sans-serif;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-outline:hover {
-    border-color: var(--green);
-    background: var(--green-glow);
-  }
-
-  .hero-stats {
-    position: absolute;
-    right: 40px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    z-index: 1;
-    animation: fadeUp 0.8s 0.2s ease both;
-  }
-
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px 28px;
-    text-align: center;
-    min-width: 160px;
-    transition: transform 0.2s;
-  }
-
-  .stat-card:hover { transform: translateX(-4px); }
-
-  .stat-number {
-    font-family: 'Syne', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--green);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  /* SECTION */
-  section {
-    padding: 80px 40px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .section-tag {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--green);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(28px, 4vw, 44px);
-    font-weight: 800;
-    letter-spacing: -1px;
-    line-height: 1.1;
-    margin-bottom: 16px;
-  }
-
-  .section-sub {
-    color: var(--muted);
-    font-size: 16px;
-    max-width: 500px;
-    margin-bottom: 56px;
-    font-weight: 300;
-  }
-
-  /* HOW IT WORKS */
-  #como-funciona { background: var(--surface); }
-
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 24px;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .step {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 32px;
-    position: relative;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-
-  .step:hover {
-    border-color: rgba(123,255,106,0.3);
-    transform: translateY(-4px);
-  }
-
-  .step-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 48px;
-    font-weight: 800;
-    color: rgba(123,255,106,0.12);
-    line-height: 1;
-    margin-bottom: 16px;
-  }
-
-  .step-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-  }
-
-  .step h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 10px;
-  }
-
-  .step p {
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.65;
-  }
-
-  /* PETS FEED */
-  .feed-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .filter-tabs {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .tab {
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 8px 18px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .tab.active, .tab:hover {
-    background: var(--green-glow);
-    border-color: rgba(123,255,106,0.4);
-    color: var(--green);
-  }
-
-  .pets-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-  }
-
-  .pet-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    transition: transform 0.2s, border-color 0.2s;
-    cursor: pointer;
-  }
-
-  .pet-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(123,255,106,0.25);
-  }
-
-  .pet-img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    background: var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 64px;
-  }
-
-  .pet-body { padding: 20px; }
-
-  .pet-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 100px;
-    margin-bottom: 10px;
-  }
-
-  .status-perdido {
-    background: rgba(255,107,107,0.12);
-    border: 1px solid rgba(255,107,107,0.3);
-    color: var(--red);
-  }
-
-  .status-encontrado {
-    background: rgba(123,255,106,0.1);
-    border: 1px solid rgba(123,255,106,0.25);
-    color: var(--green);
-  }
-
-  .pet-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .pet-info {
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 14px;
-    line-height: 1.5;
-  }
-
-  .pet-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .reward-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,184,77,0.1);
-    border: 1px solid rgba(255,184,77,0.25);
-    color: var(--amber);
-    padding: 6px 14px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .pet-date {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  /* CADASTRO */
-  #cadastro { background: var(--surface); }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    max-width: 1000px;
-    align-items: start;
-  }
-
-  .form-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 36px;
-  }
-
-  .form-card h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .form-group {
-    margin-bottom: 18px;
-  }
-
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-    margin-bottom: 6px;
-    letter-spacing: 0.02em;
-  }
-
-  input, select, textarea {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: rgba(123,255,106,0.5);
-    box-shadow: 0 0 0 3px rgba(123,255,106,0.08);
-  }
-
-  select option { background: var(--card); }
-
-  textarea { resize: vertical; min-height: 90px; }
-
-  .upload-area {
-    border: 2px dashed var(--border);
-    border-radius: 10px;
-    padding: 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-
-  .upload-area:hover {
-    border-color: rgba(123,255,106,0.4);
-    background: var(--green-glow);
-  }
-
-  .upload-icon { font-size: 32px; margin-bottom: 8px; }
-
-  .upload-text {
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .reward-input {
-    display: flex;
-    gap: 0;
-  }
-
-  .reward-prefix {
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-right: none;
-    border-radius: 10px 0 0 10px;
-    padding: 12px 14px;
-    font-size: 14px;
-    color: var(--muted);
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-  }
-
-  .reward-input input {
-    border-radius: 0 10px 10px 0;
-  }
-
-  /* ODS SECTION */
-  #ods {
-    background: linear-gradient(135deg, rgba(123,255,106,0.04) 0%, transparent 60%);
-  }
-
-  .ods-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    max-width: 1000px;
-    align-items: center;
-  }
-
-  .ods-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--green);
-    border-radius: var(--radius);
-    padding: 28px;
-    margin-bottom: 16px;
-  }
-
-  .ods-card h4 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    margin-bottom: 8px;
-    color: var(--green);
-  }
-
-  .ods-card p {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  .ods-badge {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 40px;
-    text-align: center;
-  }
-
-  .ods-number {
-    font-family: 'Syne', sans-serif;
-    font-size: 80px;
-    font-weight: 800;
-    color: var(--green);
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-
-  .ods-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  .ods-desc {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: gap;
-    gap: 16px;
-  }
-
-  .footer-logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    color: var(--green);
-    font-size: 18px;
-  }
-
-  .footer-text {
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .footer-ods {
-    font-size: 12px;
-    color: var(--muted);
-    text-align: right;
-  }
-
-  /* MODAL */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(8px);
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-  }
-
-  .modal-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  .modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 480px;
-    width: 100%;
-    transform: translateY(20px);
-    transition: transform 0.2s;
-  }
-
-  .modal-overlay.open .modal { transform: translateY(0); }
-
-  .modal h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 8px;
-  }
-
-  .modal-sub {
-    color: var(--muted);
-    font-size: 14px;
-    margin-bottom: 28px;
-  }
-
-  .modal-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 24px;
-  }
-
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 12px 24px;
-    border-radius: 100px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    flex: 1;
-    transition: all 0.2s;
-  }
-
-  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
-
-  .btn-primary-full {
-    flex: 2;
-    background: var(--green);
-    color: #0d0f0e;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 100px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    transition: transform 0.15s, box-shadow 0.2s;
-  }
-
-  .btn-primary-full:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(123,255,106,0.3);
-  }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 32px;
-    right: 32px;
-    background: var(--card);
-    border: 1px solid rgba(123,255,106,0.4);
-    border-radius: 12px;
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    z-index: 300;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: transform 0.3s, opacity 0.3s;
-    max-width: 320px;
-  }
-
-  .toast.show {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .toast-icon { font-size: 20px; }
-
-  .toast-text { font-size: 14px; font-weight: 500; }
-
-  /* ANIMATIONS */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    nav { padding: 14px 20px; }
-    nav ul { display: none; }
-    .hero { padding: 60px 20px; flex-direction: column; }
-    .hero-stats { position: static; transform: none; flex-direction: row; flex-wrap: wrap; margin-top: 40px; }
-    section { padding: 60px 20px; }
-    .form-grid { grid-template-columns: 1fr; }
-    .ods-grid { grid-template-columns: 1fr; }
-    footer { flex-direction: column; text-align: center; }
-    .footer-ods { text-align: center; }
-  }
-</style>
+<link rel="stylesheet" href="style.css">
+<script src="firebase.js" type="module"></script>
+<script src="script.js" type="module"></script>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <div class="logo">Pet<span>Reward</span></div>
+  <div class="logo">PetMatch
+  </span></div>
   <ul>
     <li><a href="#como-funciona">Como funciona</a></li>
     <li><a href="#pets">Pets perdidos</a></li>
     <li><a href="#cadastro">Cadastrar</a></li>
     <li><a href="#ods">ODS 9</a></li>
-    <li><a href="#" class="nav-cta" onclick="openModal('login')">Entrar</a></li>
+    <!-- <li><a href="#" class="nav-cta" onclick="openModal('login')">Entrar</a></li> !-->
   </ul>
 </nav>
 
@@ -856,21 +42,6 @@
       <a href="#pets" class="btn-outline">Ver animais perdidos</a>
     </div>
   </div>
-
-  <div class="hero-stats">
-    <div class="stat-card">
-      <div class="stat-number">1.2k</div>
-      <div class="stat-label">Pets encontrados</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">R$48k</div>
-      <div class="stat-label">Recompensas pagas</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">94%</div>
-      <div class="stat-label">Taxa de sucesso</div>
-    </div>
-  </div>
 </section>
 
 <!-- COMO FUNCIONA -->
@@ -885,26 +56,26 @@
         <div class="step-num">01</div>
         <div class="step-icon">📋</div>
         <h3>Cadastre o pet</h3>
-        <p>Tutor preenche as informações do animal, localização onde foi visto pela última vez e define o valor da recompensa.</p>
+        <p>Tutor preenche as informações do animal, localização onde foi visto pela última vez, data, valor da recompensa e contato por telefone ou WhatsApp.</p>
       </div>
       <div class="step">
         <div class="step-num">02</div>
         <div class="step-icon">🔍</div>
         <h3>Comunidade localiza</h3>
-        <p>Pessoas na região recebem o alerta, procuram o animal e enviam informações ou fotos de localização via plataforma.</p>
+        <p>Pessoas na região que acessarem o site podem procurar o animal e enviar informações ou fotos de localização pelo seu contato.</p>
       </div>
       <div class="step">
         <div class="step-num">03</div>
         <div class="step-icon">✅</div>
         <h3>Tutor confirma</h3>
-        <p>Após o reencontro, o tutor confirma e a plataforma libera a recompensa para quem encontrou de forma automática.</p>
+        <p>Após o reencontro, o tutor confirma e a plataforma adiciona o status de "Encontrado" à publicação</p>
       </div>
-      <div class="step">
+      <!-- <div class="step">
         <div class="step-num">04</div>
         <div class="step-icon">💳</div>
         <h3>Pagamento seguro</h3>
         <p>A recompensa fica em custódia durante todo o processo. Somente após confirmação é transferida ao localizador.</p>
-      </div>
+      </div> !-->
     </div>
   </div>
 </section>
@@ -919,14 +90,15 @@
       </div>
       <div class="filter-tabs">
         <button class="tab active" onclick="filterPets('todos', this)">Todos</button>
-        <button class="tab" onclick="filterPets('cachorro', this)">Cachorros</button>
-        <button class="tab" onclick="filterPets('gato', this)">Gatos</button>
-        <button class="tab" onclick="filterPets('encontrado', this)">Encontrados</button>
+        <button class="tab" onclick="filterPets('Cachorro', this)">Cachorros</button>
+        <button class="tab" onclick="filterPets('Gato', this)">Gatos</button>
+        <button class="tab" onclick="filterPets('Outro', this)">Outros</button>
+        <button class="tab" onclick="filterPets('encontrado', this)">Perdidos</button>
       </div>
     </div>
 
     <div class="pets-grid" id="pets-grid">
-      <!-- gerado por JS -->
+      <!-- gerado por código -->
     </div>
   </div>
 </section>
@@ -938,18 +110,18 @@
     <h2>Registrar pet perdido</h2>
     <p class="section-sub">Preencha as informações abaixo para publicar no feed e acionar a comunidade.</p>
 
-    <div class="form-grid">
+    <form class="form-grid" onsubmit="cadastrar(event)"> <!-- 'Pet cadastrado! Você receberá notificações quando houver novidades.' -->
       <div class="form-card">
         <h3>🐾 Informações do pet</h3>
 
         <div class="form-group">
           <label>Nome do animal</label>
-          <input type="text" placeholder="Ex: Thor, Mel, Bolinha...">
+          <input type="text" id="nomeForm" placeholder="Ex: Thor, Mel, Bolinha..." required max="25">
         </div>
 
         <div class="form-group">
           <label>Espécie</label>
-          <select>
+          <select id="especieForm" required>
             <option value="">Selecione</option>
             <option>Cachorro</option>
             <option>Gato</option>
@@ -959,20 +131,20 @@
 
         <div class="form-group">
           <label>Raça</label>
-          <input type="text" placeholder="Ex: Labrador, SRD...">
+          <input type="text" id="racaForm" placeholder="Ex: Labrador, SRD..." required maxlength="20">
         </div>
 
         <div class="form-group">
           <label>Cor / características</label>
-          <textarea placeholder="Descreva cor, porte, marcas especiais, coleira..."></textarea>
+          <textarea id="caracteristicasForm" placeholder="Descreva cor, porte, marcas especiais, coleira..." maxlength="300"></textarea>
         </div>
 
         <div class="form-group">
           <label>Foto do pet</label>
-          <div class="upload-area" onclick="showToast('Foto carregada com sucesso!')">
+          <input type="file" id="petImageForm" accept="image/*" style="display: none;" onchange="handleImageSelection(event)">
+          <div class="upload-area" onclick="document.getElementById('petImageForm').click()">
             <div class="upload-icon">📷</div>
-            <div class="upload-text">Clique para enviar uma foto</div>
-          </div>
+            <div class="upload-text" id="uploadAreaText">Clique para enviar uma foto</div>
         </div>
       </div>
 
@@ -980,47 +152,42 @@
         <h3>📍 Local e recompensa</h3>
 
         <div class="form-group">
-          <label>Cidade / bairro</label>
-          <input type="text" placeholder="Ex: Lorena, Centro...">
-        </div>
-
-        <div class="form-group">
           <label>Última localização vista</label>
-          <input type="text" placeholder="Rua, referência ou CEP">
+          <input type="text" id="ultimaLocalizacaoForm" placeholder="Rua, referência ou CEP" required maxlength="50">
         </div>
 
         <div class="form-group">
           <label>Data em que desapareceu</label>
-          <input type="date">
+          <input type="date" id="ultimaDataForm" required>
         </div>
 
         <div class="form-group">
-          <label>Detalhes adicionais</label>
-          <textarea placeholder="Horário, direção que seguiu, se estava assustado..."></textarea>
+          <label>Detalhes</label>
+          <textarea id="detalhesForm" placeholder="Horário, direção que seguiu, se estava assustado..." required maxlength="160"></textarea>
         </div>
 
         <div class="form-group">
           <label>Valor da recompensa</label>
           <div class="reward-input">
             <div class="reward-prefix">R$</div>
-            <input type="number" placeholder="0,00" min="0">
+            <input type="number" id="recompensaForm" placeholder="0,00" min="0" required maxlength="9999">
           </div>
         </div>
 
         <div class="form-group">
           <label>Seu contato (WhatsApp)</label>
-          <input type="tel" placeholder="(12) 9 0000-0000">
+          <input type="tel" id="telefoneForm" placeholder="(12) 9 0000-0000" required maxlength="17">
         </div>
 
-        <button class="btn-primary" style="width:100%; margin-top:8px;" onclick="showToast('Pet cadastrado! Você receberá notificações quando houver novidades.')">
+        <button class="btn-primary" style="width:100%; margin-top:8px;" type="submit"> 
           Publicar no feed
         </button>
       </div>
-    </div>
+    </form>
   </div>
 </section>
 
-<!-- ODS 9 -->
+<!-- INFORMAÇÃO SOBRE ODS 9 -->
 <section id="ods">
   <div style="max-width:1000px; margin:0 auto;">
     <div class="section-tag">Impacto</div>
@@ -1089,75 +256,6 @@
   <span class="toast-icon">✅</span>
   <span class="toast-text" id="toast-text">Ação realizada!</span>
 </div>
-
-<script>
-  // DADOS DEMO
-  const pets = [
-    { id:1, nome:'Rex', especie:'cachorro', status:'perdido', bairro:'Centro, Lorena', data:'2 dias atrás', recompensa:'R$ 300', emoji:'🐕' },
-    { id:2, nome:'Mimi', especie:'gato', status:'perdido', bairro:'Santana, Lorena', data:'5 dias atrás', recompensa:'R$ 150', emoji:'🐈' },
-    { id:3, nome:'Bolinha', especie:'cachorro', status:'encontrado', bairro:'Pq. dos Anjos, Lorena', data:'1 dia atrás', recompensa:'R$ 200', emoji:'🐕‍🦺' },
-    { id:4, nome:'Luna', especie:'gato', status:'perdido', bairro:'São José, Lorena', data:'3 dias atrás', recompensa:'R$ 100', emoji:'🐱' },
-    { id:5, nome:'Thor', especie:'cachorro', status:'perdido', bairro:'Vila Nova, Lorena', data:'Hoje', recompensa:'R$ 500', emoji:'🦮' },
-    { id:6, nome:'Fifi', especie:'gato', status:'encontrado', bairro:'Centro, Lorena', data:'3 dias atrás', recompensa:'R$ 80', emoji:'😸' },
-  ];
-
-  let filtroAtivo = 'todos';
-
-  function renderPets(lista) {
-    const grid = document.getElementById('pets-grid');
-    grid.innerHTML = lista.map(p => `
-      <div class="pet-card" onclick="showToast('Ver detalhes de ${p.nome}')">
-        <div class="pet-img">${p.emoji}</div>
-        <div class="pet-body">
-          <span class="pet-status ${p.status === 'perdido' ? 'status-perdido' : 'status-encontrado'}">
-            ${p.status === 'perdido' ? '🔴 Perdido' : '🟢 Encontrado'}
-          </span>
-          <div class="pet-name">${p.nome}</div>
-          <div class="pet-info">📍 ${p.bairro}</div>
-          <div class="pet-footer">
-            <span class="reward-badge">💰 ${p.recompensa}</span>
-            <span class="pet-date">${p.data}</span>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function filterPets(tipo, el) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    filtroAtivo = tipo;
-    const filtrado = tipo === 'todos' ? pets
-      : tipo === 'encontrado' ? pets.filter(p => p.status === 'encontrado')
-      : pets.filter(p => p.especie === tipo);
-    renderPets(filtrado);
-  }
-
-  renderPets(pets);
-
-  // MODAL
-  function openModal(id) {
-    document.getElementById('modal-' + id).classList.add('open');
-  }
-  function closeModal(id) {
-    document.getElementById('modal-' + id).classList.remove('open');
-  }
-
-  // TOAST
-  let toastTimer;
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-text').textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
-  }
-
-  // PWA
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  }
-</script>
 
 </body>
 </html>
