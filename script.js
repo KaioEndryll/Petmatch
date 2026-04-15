@@ -7,7 +7,7 @@ import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/fireba
 
 class Pet {
   constructor(id, nome, especie, status, raca, caracteristicas, ultimaLocalizacao, ultimaData, detalhes, recompensa, telefone, imageUrl, emoji) {
-    this.id = id; // Firestore document ID
+    this.id = id;
     this.nome = nome;
     this.especie = especie;
     this.status = status;
@@ -18,200 +18,237 @@ class Pet {
     this.detalhes = detalhes;
     this.recompensa = recompensa;
     this.telefone = telefone;
-    this.imageUrl = imageUrl; // URL of the uploaded image
+    this.imageUrl = imageUrl;
     this.emoji = emoji;
 
-    // Set emoji if not provided (e.g., when creating a new pet)
     if (!this.emoji) {
-        switch(this.especie) {
-            case "Cachorro":
-                this.emoji = "🐕";
-                break;
-            case "Gato":
-                this.emoji = "🐈";
-                break;
-            default:
-                this.emoji = "🐦";
-        }
+      switch (this.especie) {
+        case 'Cachorro': this.emoji = '🐕'; break;
+        case 'Gato':     this.emoji = '🐈'; break;
+        default:         this.emoji = '🐦'; break;
+      }
     }
   }
 }
 
 let pets = [];
-let selectedFile = null; // To store the selected image file for upload
+let selectedFiles = []; // array de arquivos selecionados
 
-// Function to handle image selection from the hidden input
+// ──────────────────────────────────────────────
+// FOTO — seleção com preview em grade
+// ──────────────────────────────────────────────
 function handleImageSelection(event) {
-    selectedFile = event.target.files[0];
-    const uploadAreaText = document.getElementById('uploadAreaText');
-    if (selectedFile) {
-        uploadAreaText.textContent = `Arquivo selecionado: ${selectedFile.name}`;
-    } else {
-        uploadAreaText.textContent = 'Clique para enviar uma foto';
-    }
+  const newFiles = Array.from(event.target.files);
+  selectedFiles = [...selectedFiles, ...newFiles];
+  renderPhotoPreview();
 }
-window.handleImageSelection = handleImageSelection; // Make it globally accessible for HTML
 
-// Function to upload image to Firebase Storage
+function renderPhotoPreview() {
+  const grid = document.getElementById('photoPreviewGrid');
+  const placeholder = document.getElementById('uploadPlaceholder');
+  const uploadArea = document.getElementById('uploadArea');
+
+  if (selectedFiles.length === 0) {
+    grid.style.display = 'none';
+    placeholder.style.display = 'block';
+    uploadArea.classList.remove('has-files');
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  grid.style.display = 'grid';
+  uploadArea.classList.add('has-files');
+
+  grid.innerHTML = selectedFiles.map((file, index) => {
+    const url = URL.createObjectURL(file);
+    return `
+      <div class="preview-item">
+        <img src="${url}" alt="Preview ${index + 1}">
+        <button class="preview-remove" type="button" onclick="removePhoto(${index})" title="Remover">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function removePhoto(index) {
+  selectedFiles.splice(index, 1);
+  renderPhotoPreview();
+  // Atualiza o input para evitar reenvio do arquivo removido
+  document.getElementById('petImageForm').value = '';
+}
+
+window.handleImageSelection = handleImageSelection;
+window.removePhoto = removePhoto;
+
+// ──────────────────────────────────────────────
+// FIREBASE — buscar pets
+// ──────────────────────────────────────────────
 async function uploadImage(file) {
-    if (!file) return null;
-
-    // Create a unique name for the file in Storage
-    const storageRef = ref(storage, `pet_images/${Date.now()}_${file.name}`);
-    
-    // Upload the file
-    const snapshot = await uploadBytes(storageRef, file);
-    
-    // Get the public download URL
-    return await getDownloadURL(snapshot.ref);
+  if (!file) return null;
+  const storageRef = ref(storage, `pet_images/${Date.now()}_${file.name}`);
+  const snapshot = await uploadBytes(storageRef, file);
+  return await getDownloadURL(snapshot.ref);
 }
 
-// Function to fetch pet data from Firestore
 async function getPetData() {
-    pets = []; // Clear existing pets
-    try {
-        const querySnapshot = await getDocs(petsCollection);
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            pets.push(new Pet(
-                doc.id, // Store Firestore document ID
-                data.nome,
-                data.especie,
-                data.status,
-                data.raca,
-                data.caracteristicas,
-                data.ultimaLocalizacao,
-                data.ultimaData,
-                data.detalhes,
-                data.recompensa,
-                data.telefone,
-                data.imageUrl, // Retrieve image URL
-                data.emoji
-            ));
-        });
-        renderPets(pets); // Re-render the pets grid
-    } catch (error) {
-        console.error("Erro ao carregar dados dos pets:", error);
-        showToast("Erro ao carregar pets. Tente novamente.");
-    }
+  pets = [];
+  try {
+    const querySnapshot = await getDocs(petsCollection);
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      pets.push(new Pet(
+        doc.id,
+        data.nome, data.especie, data.status, data.raca,
+        data.caracteristicas, data.ultimaLocalizacao, data.ultimaData,
+        data.detalhes, data.recompensa, data.telefone,
+        data.imageUrl, data.emoji
+      ));
+    });
+    renderPets(pets);
+  } catch (error) {
+    console.error('Erro ao carregar dados dos pets:', error);
+    showToast('Erro ao carregar pets. Tente novamente.');
+  }
 }
 
-// Fetch data when the script loads
 getPetData();
+
+// ──────────────────────────────────────────────
+// CARROSSEL INFINITO
+// ──────────────────────────────────────────────
+function buildCardHTML(p) {
+  return `
+    <div class="pet-card" onclick="showToast('Ver detalhes de ${p.nome}')">
+      <div class="pet-img">
+        ${p.imageUrl
+          ? `<img src="${p.imageUrl}" alt="${p.nome}" style="width:100%;height:100%;object-fit:cover;">`
+          : p.emoji}
+      </div>
+      <div class="pet-name">${p.nome}</div>
+      <div class="pet-body">
+        <span class="pet-status ${p.status === 'perdido' ? 'status-perdido' : 'status-encontrado'}">
+          ${p.status === 'perdido' ? '🔴 Perdido' : '🟢 Encontrado'}
+        </span>
+        <div class="pet-specie">${p.especie}</div>
+        <div class="pet-info">📍 ${p.ultimaLocalizacao}</div>
+        <div class="pet-footer">
+          <span class="reward-badge">💰 R$ ${parseFloat(p.recompensa).toFixed(2).replace('.', ',')}</span>
+          <span class="pet-date">${p.ultimaData}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPets(array) {
+  const track = document.getElementById('pets-grid');
+  if (!track) return;
+
+  const isFiltered = array.length !== pets.length;
+
+  if (array.length === 0) {
+    track.innerHTML = '<p style="color:var(--muted);padding:40px;">Nenhum pet encontrado.</p>';
+    track.classList.add('static-mode');
+    return;
+  }
+
+  if (isFiltered) {
+    // Modo grade estático quando há filtro ativo
+    track.classList.add('static-mode');
+    track.innerHTML = array.map(buildCardHTML).join('');
+  } else {
+    // Carrossel infinito: duplicar cards para loop suave
+    track.classList.remove('static-mode');
+    const cardsHTML = array.map(buildCardHTML).join('');
+    track.innerHTML = cardsHTML + cardsHTML; // duplicado para looping
+  }
+}
 
 let filtroAtivo = 'todos';
 
-// Function to render pets in the grid
-function renderPets(array) {
-    const grid = document.getElementById('pets-grid');
-    if (!grid) return; // Ensure grid element exists
-
-    grid.innerHTML = array.map(p => `
-      <div class="pet-card" onclick="showToast('Ver detalhes de ${p.nome}')">
-        <div class="pet-img">
-            ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.nome}" style="width:100%; height:100%; object-fit:cover;">` : p.emoji}
-        </div>
-        <div class="pet-name">${p.nome}</div>
-        <div class="pet-body">
-          <span class="pet-status ${p.status === 'perdido' ? 'status-perdido' : 'status-encontrado'}">
-            ${p.status === 'perdido' ? '🔴 Perdido' : '🟢 Encontrado'}
-          </span>
-          <div class="pet-specie">${p.especie}</div>
-          <div class="pet-info">📍 ${p.ultimaLocalizacao}</div>
-          <div class="pet-footer">
-            <span class="reward-badge">💰 R$ ${parseFloat(p.recompensa).toFixed(2).replace('.', ',')}</span>
-            <span class="pet-date">${p.ultimaData}</span>
-          </div>
-        </div>
-      </div>
-    `).join('');
-}
-
-// Function to filter pets based on type
 function filterPets(tipo, el) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    filtroAtivo = tipo;
-    const filtrado = tipo === 'todos' ? pets
-      : tipo === 'encontrado' ? pets.filter(p => p.status !== 'encontrado')
-      : pets.filter(p => p.especie === tipo);
-    renderPets(filtrado);
-}
-window.filterPets = filterPets; // Make it globally accessible for HTML
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  filtroAtivo = tipo;
 
-// MODAL functions
-function openModal(id) {
-    document.getElementById('modal-' + id).classList.add('open');
+  let filtrado;
+  if (tipo === 'todos')       filtrado = pets;
+  else if (tipo === 'perdido') filtrado = pets.filter(p => p.status !== 'encontrado');
+  else                        filtrado = pets.filter(p => p.especie === tipo);
+
+  renderPets(filtrado);
 }
+window.filterPets = filterPets;
+
+// ──────────────────────────────────────────────
+// MODAL
+// ──────────────────────────────────────────────
+function openModal(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
 window.openModal = openModal;
-
-function closeModal(id) {
-    document.getElementById('modal-' + id).classList.remove('open');
-}
 window.closeModal = closeModal;
 
-// TOAST functions
+// ──────────────────────────────────────────────
+// TOAST
+// ──────────────────────────────────────────────
 let toastTimer;
 function showToast(msg) {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-text').textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
 }
-window.showToast = showToast; // Make it globally accessible
+window.showToast = showToast;
 
-// Function to handle pet registration
+// ──────────────────────────────────────────────
+// CADASTRAR
+// ──────────────────────────────────────────────
 async function cadastrar(event) {
-    event.preventDefault(); // Prevent default form submission
-
-    try {
-        let imageUrl = null;
-        if (selectedFile) {
-            showToast("Fazendo upload da imagem...");
-            // Upload image to Storage first
-            imageUrl = await uploadImage(selectedFile);
-        }
-
-        // Create pet data object
-        const newPetData = new Pet(
-            null, // ID will be generated by Firestore
-            document.getElementById('nomeForm').value,
-            document.getElementById('especieForm').value,
-            "perdido", // Default status for new registrations
-            document.getElementById('racaForm').value,
-            document.getElementById('caracteristicasForm').value,
-            document.getElementById('ultimaLocalizacaoForm').value,
-            document.getElementById('ultimaDataForm').value,
-            document.getElementById('detalhesForm').value,
-            document.getElementById('recompensaForm').value,
-            document.getElementById('telefoneForm').value,
-            imageUrl // Include the uploaded image URL in Firestore
-        );
-
-        // Add pet data to Firestore
-        // Use spread operator to convert Pet instance to a plain object
-        await addDoc(petsCollection, { ...newPetData });
-
-        showToast("Pet cadastrado com sucesso! Você receberá notificações quando houver novidades.");
-        
-        // Clear form fields and reset selected file
-        document.querySelector('.form-grid').reset();
-        selectedFile = null;
-        document.getElementById('uploadAreaText').textContent = 'Clique para enviar uma foto'; // Reset upload area text
-
-        // Refresh the displayed pet list
-        await getPetData();
-
-    } catch (error) {
-        console.error("Erro ao cadastrar pet:", error);
-        showToast("Erro ao cadastrar pet. Tente novamente.");
+  event.preventDefault();
+  try {
+    let imageUrl = null;
+    if (selectedFiles.length > 0) {
+      showToast('Fazendo upload da imagem...');
+      imageUrl = await uploadImage(selectedFiles[0]); // envia a primeira
     }
+
+    const newPetData = new Pet(
+      null,
+      document.getElementById('nomeForm').value,
+      document.getElementById('especieForm').value,
+      'perdido',
+      document.getElementById('racaForm').value,
+      document.getElementById('caracteristicasForm').value,
+      document.getElementById('ultimaLocalizacaoForm').value,
+      document.getElementById('ultimaDataForm').value,
+      document.getElementById('detalhesForm').value,
+      document.getElementById('recompensaForm').value,
+      document.getElementById('telefoneForm').value,
+      imageUrl
+    );
+
+    await addDoc(petsCollection, { ...newPetData });
+
+    showToast('Pet cadastrado com sucesso! A comunidade será acionada.');
+
+    // Reset form
+    document.querySelector('.form-grid').reset();
+    selectedFiles = [];
+    renderPhotoPreview();
+
+    await getPetData();
+
+  } catch (error) {
+    console.error('Erro ao cadastrar pet:', error);
+    showToast('Erro ao cadastrar pet. Tente novamente.');
+  }
 }
+window.cadastrar = cadastrar;
 
-window.cadastrar = cadastrar; // Make it globally accessible for HTML
-
-// PWA registration (assuming sw.js exists and is correctly configured)
+// ──────────────────────────────────────────────
+// PWA
+// ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
