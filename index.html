@@ -7,6 +7,8 @@
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="firebase.js" type="module"></script>
+<script src="script.js" type="module"></script>
 </head>
 <body>
 
@@ -88,8 +90,9 @@
       </div>
       <div class="filter-tabs">
         <button class="tab active" onclick="filterPets('todos', this)">Todos</button>
-        <button class="tab" onclick="filterPets('cachorro', this)">Cachorros</button>
-        <button class="tab" onclick="filterPets('gato', this)">Gatos</button>
+        <button class="tab" onclick="filterPets('Cachorro', this)">Cachorros</button>
+        <button class="tab" onclick="filterPets('Gato', this)">Gatos</button>
+        <button class="tab" onclick="filterPets('Outro', this)">Outros</button>
         <button class="tab" onclick="filterPets('encontrado', this)">Perdidos</button>
       </div>
     </div>
@@ -138,10 +141,10 @@
 
         <div class="form-group">
           <label>Foto do pet</label>
-          <div class="upload-area" onclick="showToast('Foto carregada com sucesso!')">
+          <input type="file" id="petImageForm" accept="image/*" style="display: none;" onchange="handleImageSelection(event)">
+          <div class="upload-area" onclick="document.getElementById('petImageForm').click()">
             <div class="upload-icon">📷</div>
-            <div class="upload-text">Clique para enviar uma foto</div>
-          </div>
+            <div class="upload-text" id="uploadAreaText">Clique para enviar uma foto</div>
         </div>
       </div>
 
@@ -253,8 +256,6 @@
   <span class="toast-icon">✅</span>
   <span class="toast-text" id="toast-text">Ação realizada!</span>
 </div>
-
-<script src="script.js"></script>
 
 </body>
 </html>
