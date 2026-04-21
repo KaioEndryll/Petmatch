@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetMatch — Feed Social</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --white: #ffffff;
+    --border: #dce1e7;
+    --text: #1c1e21;
+    --muted: #65676b;
+    --accent: #1877f2;
+    --accent-light: #e7f0fd;
+    --red: #fa3e3e;
+    --green: #31a24c;
+    --amber: #f0a500;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 56px;
+    box-shadow: var(--shadow);
+  }
+  .topbar-logo {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    text-decoration: none;
+  }
+  .topbar-logo span { color: var(--text); }
+
+  .topbar-nav { display: flex; gap: 4px; }
+  .topbar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .topbar-nav a:hover { background: var(--bg); color: var(--text); }
+  .topbar-nav a.active { color: var(--accent); border-bottom: 3px solid var(--accent); border-radius: 0; }
+
+  .topbar-actions { display: flex; gap: 8px; }
+  .topbar-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    text-decoration: none;
+  }
+  .topbar-btn:hover { opacity: 0.88; }
+  .topbar-btn.secondary {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* ── LAYOUT ── */
+  .feed-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 16px;
+    display: grid;
+    grid-template-columns: 280px 1fr 280px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 72px; }
+
+  .sidebar-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .sidebar-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+  }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-item { text-align: center; }
+  .stat-n { font-size: 22px; font-weight: 800; color: var(--accent); }
+  .stat-l { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .filter-list { display: flex; flex-direction: column; gap: 4px; }
+  .filter-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    width: 100%;
+    text-align: left;
+  }
+  .filter-item:hover { background: var(--bg); }
+  .filter-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .filter-item .fi-icon { font-size: 18px; width: 24px; text-align: center; }
+  .filter-count {
+    margin-left: auto;
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 100px;
+  }
+  .filter-item.active .filter-count { background: var(--accent); color: white; }
+
+  .alert-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .alert-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .alert-emoji { font-size: 24px; flex-shrink: 0; }
+  .alert-info { flex: 1; }
+  .alert-name { font-size: 13px; font-weight: 600; }
+  .alert-loc  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .alert-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 100px;
+    color: white;
+    background: var(--red);
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .alert-badge.found { background: var(--green); }
+
+  /* ── FEED CENTER ── */
+  .feed-center { display: flex; flex-direction: column; gap: 16px; }
+
+  /* Composer */
+  .composer {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .composer-top {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1877f2, #42a5f5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+  .composer-input {
+    flex: 1;
+    background: var(--bg);
+    border: none;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+  }
+  .composer-input:hover { background: #e4e6ea; }
+  .composer-actions {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .composer-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    border: none;
+    background: transparent;
+    transition: background 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .composer-action:hover { background: var(--bg); color: var(--text); }
+
+  /* Filtro rápido de feed */
+  .feed-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .feed-tag {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .feed-tag:hover { border-color: var(--accent); color: var(--accent); }
+  .feed-tag.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  /* Post card */
+  .post-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .post-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px 0;
+  }
+  .post-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fa3e3e, #ff8c00);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .post-meta { flex: 1; }
+  .post-author { font-size: 14px; font-weight: 700; }
+  .post-time   { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .post-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.04em;
+  }
+  .ps-perdido  { background: #fdeaea; color: var(--red); }
+  .ps-encontrado { background: #e6f4ea; color: var(--green); }
+
+  .post-body { padding: 12px 16px; }
+  .post-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .post-desc  { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 10px; }
+
+  .post-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .post-tag  {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: var(--bg);
+    color: var(--muted);
+  }
+
+  .post-img-wrap {
+    margin: 0 16px 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg);
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    border: 1px solid var(--border);
+  }
+  .post-img-wrap img { width: 100%; height: 240px; object-fit: cover; display: block; }
+
+  .post-reward {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fffbea;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 0 16px 12px;
+  }
+  .post-reward-icon { font-size: 18px; }
+  .post-reward-label { font-size: 12px; color: #92400e; font-weight: 500; }
+  .post-reward-value { font-size: 16px; font-weight: 800; color: #b45309; margin-left: auto; }
+
+  .post-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 0 16px 12px;
+  }
+
+  .post-divider { border: none; border-top: 1px solid var(--border); margin: 0 16px; }
+
+  .post-actions {
+    display: flex;
+    padding: 4px 6px;
+  }
+  .post-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 8px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .post-action:hover { background: var(--bg); color: var(--text); }
+  .post-action.liked { color: var(--red); }
+  .post-action.shared { color: var(--green); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #333;
+    color: white;
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 999;
+    transform: translateY(70px);
+    opacity: 0;
+    transition: transform 0.25s, opacity 0.25s;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    max-width: 300px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .feed-layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+  @media (max-width: 600px) {
+    .topbar-nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">Pet<span>Match</span></a>
+
+  <nav class="topbar-nav">
+    <a href="index.html">🏠 Início</a>
+    <a href="feed.html" class="active">📰 Feed Social</a>
+    <a href="index.html#cadastro">➕ Cadastrar</a>
+  </nav>
+
+  <div class="topbar-actions">
+    <a href="index.html#cadastro" class="topbar-btn">+ Publicar pet perdido</a>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="feed-layout">
+
+  <!-- SIDEBAR ESQUERDA -->
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-title">Estatísticas</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-n">1.2k</div>
+          <div class="stat-l">Encontrados</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-n">48</div>
+          <div class="stat-l">Ativos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-n">94%</div>
+          <div class="stat-l">Sucesso</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-n">R$48k</div>
+          <div class="stat-l">Pagos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">Filtrar por</div>
+      <div class="filter-list" id="sidebar-filters">
+        <button class="filter-item active" onclick="sideFilter('todos', this)">
+          <span class="fi-icon">🐾</span> Todos
+          <span class="filter-count" id="count-todos">0</span>
+        </button>
+        <button class="filter-item" onclick="sideFilter('perdido', this)">
+          <span class="fi-icon">🔴</span> Perdidos
+          <span class="filter-count" id="count-perdidos">0</span>
+        </button>
+        <button class="filter-item" onclick="sideFilter('encontrado', this)">
+          <span class="fi-icon">🟢</span> Encontrados
+          <span class="filter-count" id="count-encontrados">0</span>
+        </button>
+        <button class="filter-item" onclick="sideFilter('Cachorro', this)">
+          <span class="fi-icon">🐕</span> Cachorros
+          <span class="filter-count" id="count-cachorro">0</span>
+        </button>
+        <button class="filter-item" onclick="sideFilter('Gato', this)">
+          <span class="fi-icon">🐈</span> Gatos
+          <span class="filter-count" id="count-gato">0</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- FEED CENTRAL -->
+  <main class="feed-center">
+
+    <!-- Composer -->
+    <div class="composer">
+      <div class="composer-top">
+        <div class="avatar">K</div>
+        <input class="composer-input" type="text" placeholder="Viu algum pet perdido? Compartilhe..." readonly onclick="toast('Acesse a aba Cadastrar para publicar!')">
+      </div>
+      <div class="composer-actions">
+        <button class="composer-action" onclick="toast('📷 Envie uma foto pelo formulário de cadastro')">📷 Foto</button>
+        <button class="composer-action" onclick="toast('📍 Localize no mapa pelo formulário de cadastro')">📍 Localização</button>
+        <button class="composer-action" onclick="window.location.href='index.html#cadastro'">🐾 Pet perdido</button>
+      </div>
+    </div>
+
+    <!-- Filtro rápido -->
+    <div class="feed-filter" id="feed-quick-filter">
+      <button class="feed-tag active" onclick="quickFilter('todos', this)">Todos</button>
+      <button class="feed-tag" onclick="quickFilter('perdido', this)">Perdidos</button>
+      <button class="feed-tag" onclick="quickFilter('encontrado', this)">Encontrados</button>
+      <button class="feed-tag" onclick="quickFilter('Cachorro', this)">Cachorros</button>
+      <button class="feed-tag" onclick="quickFilter('Gato', this)">Gatos</button>
+    </div>
+
+    <!-- Posts -->
+    <div id="posts-container">
+      <!-- gerado por JS -->
+    </div>
+
+  </main>
+
+  <!-- SIDEBAR DIREITA -->
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-title">Alertas recentes</div>
+      <div id="sidebar-recent">
+        <!-- gerado por JS -->
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">Sobre o projeto</div>
+      <p style="font-size:13px; color:var(--muted); line-height:1.6;">
+        PetMatch é uma plataforma de recompensas para encontrar pets perdidos, desenvolvida como Projeto Integrador alinhado à <strong style="color:var(--text);">ODS 9</strong> da ONU.
+      </p>
+      <p style="font-size:12px; color:var(--muted); margin-top:10px; line-height:1.5;">
+        UNISAL Lorena · Engenharia da Computação
+      </p>
+    </div>
+
+    <div class="sidebar-card" style="font-size:12px; color:var(--muted); line-height:1.8;">
+      <div class="sidebar-title">Autores</div>
+      Kaio Endryll<br>
+      Gabriel Felipe<br>
+      Victor Alexandre<br>
+      Talles Henrique<br>
+      Kaue
+    </div>
+  </aside>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="fb-toast">
+  <span>ℹ️</span>
+  <span id="fb-toast-text"></span>
+</div>
+
+<script type="module">
+  // ── Dados demo (substitua por Firebase se quiser)
+  const demoPets = [
+    { id:1, nome:'Rex', especie:'Cachorro', raca:'Labrador', status:'perdido', ultimaLocalizacao:'Centro, Lorena-SP', ultimaData:'2025-04-13', detalhes:'Fugiu pelo portão aberto. Usa coleira vermelha. Muito dócil.', recompensa:300, telefone:'(12) 99999-1111', emoji:'🐕', imageUrl: null },
+    { id:2, nome:'Mimi', especie:'Gato', raca:'SRD', status:'perdido', ultimaLocalizacao:'Santana, Lorena-SP', ultimaData:'2025-04-10', detalhes:'Gata persa cinza, olhos azuis. Assustada com barulho.', recompensa:150, telefone:'(12) 99999-2222', emoji:'🐈', imageUrl: null },
+    { id:3, nome:'Bolinha', especie:'Cachorro', raca:'Poodle', status:'encontrado', ultimaLocalizacao:'Pq. dos Anjos, Lorena', ultimaData:'2025-04-09', detalhes:'Encontrado perto do parque por um morador. Estava bem!', recompensa:200, telefone:'(12) 99999-3333', emoji:'🐕‍🦺', imageUrl: null },
+    { id:4, nome:'Luna', especie:'Gato', raca:'Siamês', status:'perdido', ultimaLocalizacao:'São José, Lorena-SP', ultimaData:'2025-04-12', detalhes:'Gato siamês, manchas escuras nas patas. Responde pelo nome.', recompensa:100, telefone:'(12) 99999-4444', emoji:'🐱', imageUrl: null },
+    { id:5, nome:'Thor', especie:'Cachorro', raca:'Pastor Alemão', status:'perdido', ultimaLocalizacao:'Vila Nova, Lorena', ultimaData:'2025-04-15', detalhes:'Cachorro grande, pelagem marrom e preta. Levemente assustado.', recompensa:500, telefone:'(12) 99999-5555', emoji:'🦮', imageUrl: null },
+    { id:6, nome:'Fifi', especie:'Gato', raca:'Persa', status:'encontrado', ultimaLocalizacao:'Centro, Lorena-SP', ultimaData:'2025-04-08', detalhes:'Encontrada no telhado de um vizinho. Sem ferimentos.', recompensa:80, telefone:'(12) 99999-6666', emoji:'😸', imageUrl: null },
+  ];
+
+  let allPets = [...demoPets];
+  let activeFeedFilter = 'todos';
+  let likedPosts = new Set();
+  let sharedPosts = new Set();
+
+  function timeAgo(dateStr) {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+    if (diff === 0) return 'Hoje';
+    if (diff === 1) return 'Ontem';
+    return `${diff} dias atrás`;
+  }
+
+  function formatReward(v) {
+    return 'R$ ' + parseFloat(v).toFixed(2).replace('.', ',');
+  }
+
+  function buildPost(p) {
+    const isLiked   = likedPosts.has(p.id);
+    const isShared  = sharedPosts.has(p.id);
+    const statusCls = p.status === 'perdido' ? 'ps-perdido' : 'ps-encontrado';
+    const statusTxt = p.status === 'perdido' ? '🔴 Perdido' : '🟢 Encontrado';
+
+    return `
+      <div class="post-card" id="post-${p.id}">
+        <div class="post-header">
+          <div class="post-avatar">${p.emoji}</div>
+          <div class="post-meta">
+            <div class="post-author">${p.nome} · ${p.raca}</div>
+            <div class="post-time">📅 ${timeAgo(p.ultimaData)} · ${p.ultimaLocalizacao}</div>
+          </div>
+          <span class="post-status ${statusCls}">${statusTxt}</span>
+        </div>
+
+        <div class="post-body">
+          <div class="post-title">${p.nome} está ${p.status === 'perdido' ? 'desaparecido(a)' : 'de volta!'}</div>
+          <div class="post-desc">${p.detalhes}</div>
+          <div class="post-tags">
+            <span class="post-tag">${p.especie}</span>
+            <span class="post-tag">${p.raca}</span>
+          </div>
+        </div>
+
+        <div class="post-img-wrap">
+          ${p.imageUrl
+            ? `<img src="${p.imageUrl}" alt="${p.nome}">`
+            : p.emoji}
+        </div>
+
+        <div class="post-reward">
+          <span class="post-reward-icon">💰</span>
+          <span class="post-reward-label">Recompensa oferecida</span>
+          <span class="post-reward-value">${formatReward(p.recompensa)}</span>
+        </div>
+
+        <div class="post-location">📍 ${p.ultimaLocalizacao}</div>
+
+        <hr class="post-divider">
+
+        <div class="post-actions">
+          <button class="post-action ${isLiked ? 'liked' : ''}" onclick="toggleLike(${p.id})">
+            ${isLiked ? '❤️' : '🤍'} ${isLiked ? 'Curtido' : 'Curtir'}
+          </button>
+          <button class="post-action" onclick="toast('💬 Comentários em breve!')">
+            💬 Comentar
+          </button>
+          <button class="post-action ${isShared ? 'shared' : ''}" onclick="toggleShare(${p.id})">
+            ${isShared ? '✅' : '🔁'} ${isShared ? 'Compartilhado' : 'Compartilhar'}
+          </button>
+          <button class="post-action" onclick="toast('📞 Contato: ${p.telefone}')">
+            📞 Contato
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPosts(arr) {
+    const container = document.getElementById('posts-container');
+    if (arr.length === 0) {
+      container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px;">Nenhum pet encontrado para este filtro.</div>`;
+      return;
+    }
+    container.innerHTML = arr.map(buildPost).join('');
+  }
+
+  function filterByType(tipo) {
+    if (tipo === 'todos')       return allPets;
+    if (tipo === 'perdido')     return allPets.filter(p => p.status === 'perdido');
+    if (tipo === 'encontrado')  return allPets.filter(p => p.status === 'encontrado');
+    return allPets.filter(p => p.especie === tipo);
+  }
+
+  window.quickFilter = function(tipo, el) {
+    document.querySelectorAll('.feed-tag').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    activeFeedFilter = tipo;
+    renderPosts(filterByType(tipo));
+  };
+
+  window.sideFilter = function(tipo, el) {
+    document.querySelectorAll('.filter-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    activeFeedFilter = tipo;
+    renderPosts(filterByType(tipo));
+    // sync quick filter
+    document.querySelectorAll('.feed-tag').forEach(t => {
+      if (t.textContent.toLowerCase().includes(tipo) || (tipo === 'todos' && t.textContent === 'Todos')) {
+        t.classList.add('active');
+      } else {
+        t.classList.remove('active');
+      }
+    });
+  };
+
+  window.toggleLike = function(id) {
+    if (likedPosts.has(id)) likedPosts.delete(id);
+    else likedPosts.add(id);
+    renderPosts(filterByType(activeFeedFilter));
+  };
+
+  window.toggleShare = function(id) {
+    if (sharedPosts.has(id)) sharedPosts.delete(id);
+    else {
+      sharedPosts.add(id);
+      toast('🔁 Publicação compartilhada!');
+    }
+    renderPosts(filterByType(activeFeedFilter));
+  };
+
+  // Sidebar recentes
+  function renderRecent() {
+    const recent = [...allPets].slice(0, 4);
+    document.getElementById('sidebar-recent').innerHTML = recent.map(p => `
+      <div class="alert-item">
+        <div class="alert-emoji">${p.emoji}</div>
+        <div class="alert-info">
+          <div class="alert-name">${p.nome}</div>
+          <div class="alert-loc">${p.ultimaLocalizacao}</div>
+        </div>
+        <span class="alert-badge ${p.status === 'encontrado' ? 'found' : ''}">
+          ${p.status === 'perdido' ? 'PERDIDO' : 'ACHADO'}
+        </span>
+      </div>
+    `).join('');
+  }
+
+  // Contadores sidebar
+  function updateCounts() {
+    document.getElementById('count-todos').textContent = allPets.length;
+    document.getElementById('count-perdidos').textContent = allPets.filter(p=>p.status==='perdido').length;
+    document.getElementById('count-encontrados').textContent = allPets.filter(p=>p.status==='encontrado').length;
+    document.getElementById('count-cachorro').textContent = allPets.filter(p=>p.especie==='Cachorro').length;
+    document.getElementById('count-gato').textContent = allPets.filter(p=>p.especie==='Gato').length;
+  }
+
+  // Toast
+  let toastT;
+  window.toast = function(msg) {
+    const el = document.getElementById('fb-toast');
+    document.getElementById('fb-toast-text').textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => el.classList.remove('show'), 3000);
+  };
+
+  // Init
+  renderPosts(allPets);
+  renderRecent();
+  updateCounts();
+</script>
+
+</body>
+</html>
