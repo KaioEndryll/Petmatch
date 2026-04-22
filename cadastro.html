@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastrar Pet Perdido - PetMatch</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">PetMatch</div>
+  <ul>
+    <li><a href="index.html">Início</a></li>
+    <li><a href="index.html#como-funciona">Como funciona</a></li>
+    <li><a href="index.html#pets">Pets perdidos</a></li>
+    <li><a href="cadastro.html">Cadastrar</a></li>
+    <li><a href="index.html#ods">ODS 9</a></li>
+  </ul>
+</nav>
+
+<!-- CADASTRO -->
+<section id="cadastro">
+  <div style="max-width:1000px; margin:0 auto;">
+    <div class="section-tag">Cadastro</div>
+    <h2>Registrar pet perdido</h2>
+    <p class="section-sub">Preencha as informações abaixo para publicar no feed e acionar a comunidade.</p>
+
+    <form class="form-grid" onsubmit="cadastrar(event)">
+      <div class="form-card">
+        <h3>🐾 Informações do pet</h3>
+
+        <div class="form-group">
+          <label>Nome do animal</label>
+          <input type="text" id="nomeForm" placeholder="Ex: Thor, Mel, Bolinha..." required maxlength="25">
+        </div>
+
+        <div class="form-group">
+          <label>Espécie</label>
+          <select id="especieForm" required>
+            <option value="">Selecione</option>
+            <option>Cachorro</option>
+            <option>Gato</option>
+            <option>Outro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Raça</label>
+          <input type="text" id="racaForm" placeholder="Ex: Labrador, SRD..." required maxlength="20">
+        </div>
+
+        <div class="form-group">
+          <label>Cor / características</label>
+          <textarea id="caracteristicasForm" placeholder="Descreva cor, porte, marcas especiais, coleira..." maxlength="300"></textarea>
+        </div>
+
+        <!-- UPLOAD COM PREVIEW EM GRADE -->
+        <div class="form-group">
+          <label>Foto do pet</label>
+          <input type="file" id="petImageForm" accept="image/*" multiple style="display:none;" onchange="handleImageSelection(event)">
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('petImageForm').click()">
+            <div id="uploadPlaceholder">
+              <div class="upload-icon">📷</div>
+              <div class="upload-text" id="uploadAreaText">Clique para enviar fotos</div>
+            </div>
+            <div class="photo-preview-grid" id="photoPreviewGrid" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3>📍 Local e recompensa</h3>
+
+        <div class="form-group">
+          <label>Última localização vista</label>
+          <input type="text" id="ultimaLocalizacaoForm" placeholder="Rua, referência ou CEP" required maxlength="80">
+        </div>
+
+        <!-- MAPA LEAFLET -->
+        <div class="form-group">
+          <label>Marcar no mapa <span style="font-size:11px; font-weight:400; color:var(--muted);">(clique para alfinetar)</span></label>
+          <div id="map-container">
+            <div id="pet-map"></div>
+            <div class="map-hint">📌 Clique no mapa para posicionar o alfinete</div>
+            <div id="coords-display"></div>
+          </div>
+          <input type="hidden" id="latForm">
+          <input type="hidden" id="lngForm">
+        </div>
+
+        <div class="form-group">
+          <label>Data em que desapareceu</label>
+          <input type="date" id="ultimaDataForm" required>
+        </div>
+
+        <div class="form-group">
+          <label>Detalhes</label>
+          <textarea id="detalhesForm" placeholder="Horário, direção que seguiu, se estava assustado..." required maxlength="160"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Valor da recompensa</label>
+          <div class="reward-input">
+            <div class="reward-prefix">R$</div>
+            <input type="number" id="recompensaForm" placeholder="0,00" min="0" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Seu contato (WhatsApp)</label>
+          <input type="tel" id="telefoneForm" placeholder="(12) 9 0000-0000" required maxlength="17">
+        </div>
+
+        <button class="btn-primary" style="width:100%; margin-top:8px;" type="submit">
+          Publicar no feed
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- TOAST -->
+<div id="toast">
+  <div id="toast-text"></div>
+</div>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="script.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</body>
+</html></content>

@@ -9,162 +9,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="style.css">
 
-<style>
-  /* === FONT OVERRIDE === */
-  * { font-family: 'Inter', sans-serif !important; }
-
-  /* === CAROUSEL === */
-  .carousel-outer {
-    overflow: hidden;
-    position: relative;
-    padding: 12px 0 24px;
-    mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-  }
-  .carousel-track {
-    display: flex;
-    gap: 20px;
-    width: max-content;
-    animation: scroll-left 35s linear infinite;
-  }
-  .carousel-track:hover { animation-play-state: paused; }
-  .carousel-track .pet-card {
-    width: 280px;
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-  @keyframes scroll-left {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  /* filtered mode: static grid */
-  .carousel-track.static-mode {
-    animation: none;
-    flex-wrap: wrap;
-    width: auto;
-    justify-content: flex-start;
-  }
-  .carousel-track.static-mode .pet-card { width: 280px; }
-
-  /* === ODS SECTION — gradient branco → laranja === */
-  #ods {
-    background: linear-gradient(145deg, #ffffff 0%, #ffe5c2 45%, #ff8c00 100%) !important;
-    position: relative;
-  }
-  #ods .section-tag { color: #d45f00 !important; }
-  #ods h2 { color: #1a1a1a !important; }
-  #ods .section-sub { color: #555 !important; }
-  #ods .ods-card {
-    background: rgba(255,255,255,0.75) !important;
-    border: 1px solid rgba(255,140,0,0.25) !important;
-    border-left: 3px solid #ff8c00 !important;
-    backdrop-filter: blur(8px);
-  }
-  #ods .ods-card h4 { color: #c45500 !important; }
-  #ods .ods-card p  { color: #333 !important; }
-  #ods .ods-badge {
-    background: rgba(255,255,255,0.65) !important;
-    border: 1px solid rgba(255,140,0,0.3) !important;
-    backdrop-filter: blur(10px);
-  }
-  #ods .ods-number { color: #e06000 !important; font-size: 70px !important; }
-  #ods .ods-title  { color: #1a1a1a !important; }
-  #ods .ods-desc   { color: #444 !important; }
-
-  /* === PHOTO PREVIEW GRID === */
-  .photo-preview-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .photo-preview-grid .preview-item {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--border, #2a2f2a);
-  }
-  .photo-preview-grid .preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    border: none !important;
-  }
-  .photo-preview-grid .preview-remove {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    background: rgba(0,0,0,0.6);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 11px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-  .upload-area.has-files {
-    padding: 12px;
-    border-style: solid;
-    border-color: rgba(123,255,106,0.4);
-  }
-
-  /* === LEAFLET MAP === */
-  #map-container { margin-top: 6px; }
-  #pet-map {
-    height: 240px;
-    border-radius: 10px;
-    border: 1px solid var(--border, #2a2f2a);
-    z-index: 0;
-  }
-  .map-hint {
-    font-size: 12px;
-    color: var(--muted, #7a8a7a);
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  #coords-display {
-    font-size: 11px;
-    color: var(--green, #7bff6a);
-    margin-top: 4px;
-    min-height: 16px;
-  }
-
-  /* === FOOTER AUTHORS === */
-  .footer-authors {
-    font-size: 12px;
-    color: var(--muted, #7a8a7a);
-    border-top: 1px solid var(--border, #2a2f2a);
-    margin-top: 20px;
-    padding-top: 20px;
-    text-align: center;
-    width: 100%;
-  }
-  .footer-authors strong { color: var(--text, #e8ede8); font-weight: 600; }
-  footer { flex-wrap: wrap; }
-
-  /* === NAV FEED LINK === */
-  .nav-feed {
-    background: rgba(123,255,106,0.1);
-    border: 1px solid rgba(123,255,106,0.25);
-    color: var(--green, #7bff6a) !important;
-    padding: 6px 16px;
-    border-radius: 100px;
-    font-weight: 600 !important;
-    transition: background 0.2s !important;
-  }
-  .nav-feed:hover {
-    background: rgba(123,255,106,0.2) !important;
-  }
-</style>
 </head>
 <body>
 
@@ -172,10 +16,10 @@
 <nav>
   <div class="logo">PetMatch</div>
   <ul>
-    <li><a href="feed.html" class="nav-feed">📰 Feed Social</a></li>
+    <li><a href="feed.html">Feed Social</a></li>
     <li><a href="#como-funciona">Como funciona</a></li>
     <li><a href="#pets">Pets perdidos</a></li>
-    <li><a href="#cadastro">Cadastrar</a></li>
+    <li><a href="cadastro.html">Cadastrar</a></li>
     <li><a href="#ods">ODS 9</a></li>
   </ul>
 </nav>
@@ -192,11 +36,18 @@
     <h1>Seu pet<br>perdido,<br><em>encontrado.</em></h1>
     <p>Conectamos tutores a pessoas que ajudam a localizar animais perdidos, com recompensas financeiras seguras e transparentes.</p>
     <div class="hero-actions">
-      <a href="#cadastro" class="btn-primary">Cadastrar pet perdido</a>
+      <a href="cadastro.html" class="btn-primary">Cadastrar pet perdido</a>
       <a href="#pets" class="btn-outline">Ver animais perdidos</a>
     </div>
   </div>
 </section>
+
+<!-- BOTÃO FEED -->
+<div class="feed-button">
+  <a href="feed.html" style="pointer-events: all; background: #f27e18; color: white; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; padding: 14px 24px; border-radius: 50px; text-decoration: none; box-shadow: 0 4px 20px rgba(24,119,242,0.45); transition: opacity 0.2s, transform 0.2s;" onmouseover="this.style.opacity='0.88';this.style.transform='scale(1.04)'" onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
+    📰 Feed Social
+  </a>
+</div>
 
 <!-- COMO FUNCIONA -->
 <section id="como-funciona">
@@ -253,107 +104,6 @@
   </div>
 </section>
 
-<!-- CADASTRO -->
-<section id="cadastro">
-  <div style="max-width:1000px; margin:0 auto;">
-    <div class="section-tag">Cadastro</div>
-    <h2>Registrar pet perdido</h2>
-    <p class="section-sub">Preencha as informações abaixo para publicar no feed e acionar a comunidade.</p>
-
-    <form class="form-grid" onsubmit="cadastrar(event)">
-      <div class="form-card">
-        <h3>🐾 Informações do pet</h3>
-
-        <div class="form-group">
-          <label>Nome do animal</label>
-          <input type="text" id="nomeForm" placeholder="Ex: Thor, Mel, Bolinha..." required maxlength="25">
-        </div>
-
-        <div class="form-group">
-          <label>Espécie</label>
-          <select id="especieForm" required>
-            <option value="">Selecione</option>
-            <option>Cachorro</option>
-            <option>Gato</option>
-            <option>Outro</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Raça</label>
-          <input type="text" id="racaForm" placeholder="Ex: Labrador, SRD..." required maxlength="20">
-        </div>
-
-        <div class="form-group">
-          <label>Cor / características</label>
-          <textarea id="caracteristicasForm" placeholder="Descreva cor, porte, marcas especiais, coleira..." maxlength="300"></textarea>
-        </div>
-
-        <!-- UPLOAD COM PREVIEW EM GRADE -->
-        <div class="form-group">
-          <label>Foto do pet</label>
-          <input type="file" id="petImageForm" accept="image/*" multiple style="display:none;" onchange="handleImageSelection(event)">
-          <div class="upload-area" id="uploadArea" onclick="document.getElementById('petImageForm').click()">
-            <div id="uploadPlaceholder">
-              <div class="upload-icon">📷</div>
-              <div class="upload-text" id="uploadAreaText">Clique para enviar fotos</div>
-            </div>
-            <div class="photo-preview-grid" id="photoPreviewGrid" style="display:none;"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-card">
-        <h3>📍 Local e recompensa</h3>
-
-        <div class="form-group">
-          <label>Última localização vista</label>
-          <input type="text" id="ultimaLocalizacaoForm" placeholder="Rua, referência ou CEP" required maxlength="80">
-        </div>
-
-        <!-- MAPA LEAFLET -->
-        <div class="form-group">
-          <label>Marcar no mapa <span style="font-size:11px; font-weight:400; color:var(--muted);">(clique para alfinetar)</span></label>
-          <div id="map-container">
-            <div id="pet-map"></div>
-            <div class="map-hint">📌 Clique no mapa para posicionar o alfinete</div>
-            <div id="coords-display"></div>
-          </div>
-          <input type="hidden" id="latForm">
-          <input type="hidden" id="lngForm">
-        </div>
-
-        <div class="form-group">
-          <label>Data em que desapareceu</label>
-          <input type="date" id="ultimaDataForm" required>
-        </div>
-
-        <div class="form-group">
-          <label>Detalhes</label>
-          <textarea id="detalhesForm" placeholder="Horário, direção que seguiu, se estava assustado..." required maxlength="160"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>Valor da recompensa</label>
-          <div class="reward-input">
-            <div class="reward-prefix">R$</div>
-            <input type="number" id="recompensaForm" placeholder="0,00" min="0" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Seu contato (WhatsApp)</label>
-          <input type="tel" id="telefoneForm" placeholder="(12) 9 0000-0000" required maxlength="17">
-        </div>
-
-        <button class="btn-primary" style="width:100%; margin-top:8px;" type="submit">
-          Publicar no feed
-        </button>
-      </div>
-    </form>
-  </div>
-</section>
-
 <!-- ODS 9 -->
 <section id="ods">
   <div style="max-width:1000px; margin:0 auto;">
@@ -395,29 +145,10 @@
 
   <div class="footer-authors">
     <strong>Autores:</strong>
-    Kaio Endryll &nbsp;·&nbsp; Gabriel Felipe &nbsp;·&nbsp; Victor Alexandre &nbsp;·&nbsp; Talles Henrique &nbsp;·&nbsp; Kaue
+    Kaio Endryll &nbsp;·&nbsp; Gabriel Felipe &nbsp;·&nbsp; Victor Alexandre &nbsp;·&nbsp; Talles Henrique &nbsp;·&nbsp; Kaue de Moura
   </div>
 </footer>
 
-<!-- MODAL LOGIN -->
-<div class="modal-overlay" id="modal-login" onclick="closeModal('login')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h3>Bem-vindo de volta</h3>
-    <p class="modal-sub">Entre na sua conta para gerenciar seus pets e recompensas.</p>
-    <div class="form-group">
-      <label>E-mail</label>
-      <input type="email" placeholder="seu@email.com">
-    </div>
-    <div class="form-group">
-      <label>Senha</label>
-      <input type="password" placeholder="••••••••">
-    </div>
-    <div class="modal-actions">
-      <button class="btn-ghost" onclick="closeModal('login')">Cancelar</button>
-      <button class="btn-primary-full" onclick="closeModal('login'); showToast('Login realizado com sucesso!')">Entrar</button>
-    </div>
-  </div>
-</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast">
@@ -427,46 +158,6 @@
 
 <!-- LEAFLET JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-  // Inicializar mapa Leaflet centrado em Lorena-SP
-  const map = L.map('pet-map').setView([-22.7286, -45.1233], 13);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-    maxZoom: 19
-  }).addTo(map);
-
-  let marker = null;
-
-  const pinIcon = L.divIcon({
-    html: '<div style="font-size:28px; line-height:1;">📌</div>',
-    iconSize: [28, 28],
-    iconAnchor: [14, 28],
-    className: ''
-  });
-
-  map.on('click', function(e) {
-    const { lat, lng } = e.latlng;
-
-    if (marker) {
-      marker.setLatLng(e.latlng);
-    } else {
-      marker = L.marker(e.latlng, { icon: pinIcon, draggable: true }).addTo(map);
-      marker.on('dragend', function(ev) {
-        const pos = ev.target.getLatLng();
-        updateCoords(pos.lat, pos.lng);
-      });
-    }
-    updateCoords(lat, lng);
-  });
-
-  function updateCoords(lat, lng) {
-    document.getElementById('latForm').value = lat.toFixed(6);
-    document.getElementById('lngForm').value = lng.toFixed(6);
-    document.getElementById('coords-display').textContent =
-      `📍 Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-  }
-</script>
 
 <script src="firebase.js" type="module"></script>
 <script src="script.js" type="module"></script>

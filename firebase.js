@@ -50,3 +50,4 @@ export const storage = getStorage(app);
 // Reference to the 'pets' collection
 
 export const petsCollection = collection(db, "pets");
+export const chatCollection = collection(db, "chat");

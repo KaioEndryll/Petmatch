@@ -6,7 +6,7 @@ import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/fireba
 
 
 class Pet {
-  constructor(id, nome, especie, status, raca, caracteristicas, ultimaLocalizacao, ultimaData, detalhes, recompensa, telefone, imageUrl, emoji) {
+  constructor(id, nome, especie, status, raca, caracteristicas, ultimaLocalizacao, ultimaData, detalhes, recompensa, telefone, imageUrls, emoji) {
     this.id = id;
     this.nome = nome;
     this.especie = especie;
@@ -18,7 +18,7 @@ class Pet {
     this.detalhes = detalhes;
     this.recompensa = recompensa;
     this.telefone = telefone;
-    this.imageUrl = imageUrl;
+    this.imageUrls = imageUrls || [];
     this.emoji = emoji;
 
     if (!this.emoji) {
@@ -81,13 +81,33 @@ window.handleImageSelection = handleImageSelection;
 window.removePhoto = removePhoto;
 
 // ──────────────────────────────────────────────
-// FIREBASE — buscar pets
+// FOTO — Upload para ImgBB
 // ──────────────────────────────────────────────
 async function uploadImage(file) {
   if (!file) return null;
-  const storageRef = ref(storage, `pet_images/${Date.now()}_${file.name}`);
-  const snapshot = await uploadBytes(storageRef, file);
-  return await getDownloadURL(snapshot.ref);
+
+  // Convert the file to Base64 (ImgBB needs this format)
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]); // removes the "data:image/jpeg;base64," part
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  // Send to ImgBB
+  const formData = new FormData();
+  formData.append('image', base64);
+
+  const response = await fetch('https://api.imgbb.com/1/upload?key=fff4f58ce64b5aab13b34a51207ebb5e', {
+    method: 'POST',
+    body: formData,
+  });
+
+  const result = await response.json();
+
+  if (!result.success) throw new Error('Falha no upload da imagem');
+
+  return result.data.url;
 }
 
 async function getPetData() {
@@ -101,7 +121,7 @@ async function getPetData() {
         data.nome, data.especie, data.status, data.raca,
         data.caracteristicas, data.ultimaLocalizacao, data.ultimaData,
         data.detalhes, data.recompensa, data.telefone,
-        data.imageUrl, data.emoji
+        data.imageUrls, data.emoji
       ));
     });
     renderPets(pets);
@@ -120,12 +140,13 @@ function buildCardHTML(p) {
   return `
     <div class="pet-card" onclick="showToast('Ver detalhes de ${p.nome}')">
       <div class="pet-img">
-        ${p.imageUrl
-          ? `<img src="${p.imageUrl}" alt="${p.nome}" style="width:100%;height:100%;object-fit:cover;">`
+        ${p.imageUrls && p.imageUrls.length > 0
+          ? `<img src="${p.imageUrls[0]}" alt="${p.nome}" style="width:100%;height:100%;object-fit:cover;">`
           : p.emoji}
       </div>
       <div class="pet-name">${p.nome}</div>
       <div class="pet-body">
+        <p class="pet-caracteristicas"> ${p.caracteristicas}</p>
         <span class="pet-status ${p.status === 'perdido' ? 'status-perdido' : 'status-encontrado'}">
           ${p.status === 'perdido' ? '🔴 Perdido' : '🟢 Encontrado'}
         </span>
@@ -207,10 +228,10 @@ window.showToast = showToast;
 async function cadastrar(event) {
   event.preventDefault();
   try {
-    let imageUrl = null;
+    let imageUrls = [];
     if (selectedFiles.length > 0) {
-      showToast('Fazendo upload da imagem...');
-      imageUrl = await uploadImage(selectedFiles[0]); // envia a primeira
+      showToast('Fazendo upload das imagens...');
+      imageUrls = await Promise.all(selectedFiles.map(file => uploadImage(file)));
     }
 
     const newPetData = new Pet(
@@ -225,7 +246,7 @@ async function cadastrar(event) {
       document.getElementById('detalhesForm').value,
       document.getElementById('recompensaForm').value,
       document.getElementById('telefoneForm').value,
-      imageUrl
+      imageUrls
     );
 
     await addDoc(petsCollection, { ...newPetData });
@@ -252,3 +273,42 @@ window.cadastrar = cadastrar;
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+  // Inicializar mapa Leaflet centrado em Lorena-SP
+  const map = L.map('pet-map').setView([-22.7286, -45.1233], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+    maxZoom: 19
+  }).addTo(map);
+
+  let marker = null;
+
+  const pinIcon = L.divIcon({
+    html: '<div style="font-size:28px; line-height:1;">📌</div>',
+    iconSize: [28, 28],
+    iconAnchor: [14, 28],
+    className: ''
+  });
+
+  map.on('click', function(e) {
+    const { lat, lng } = e.latlng;
+
+    if (marker) {
+      marker.setLatLng(e.latlng);
+    } else {
+      marker = L.marker(e.latlng, { icon: pinIcon, draggable: true }).addTo(map);
+      marker.on('dragend', function(ev) {
+        const pos = ev.target.getLatLng();
+        updateCoords(pos.lat, pos.lng);
+      });
+    }
+    updateCoords(lat, lng);
+  });
+
+  function updateCoords(lat, lng) {
+    document.getElementById('latForm').value = lat.toFixed(6);
+    document.getElementById('lngForm').value = lng.toFixed(6);
+    document.getElementById('coords-display').textContent =
+      `📍 Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+  }
