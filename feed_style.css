@@ -557,7 +557,9 @@
   @media (max-width: 860px) {
     .feed-layout { grid-template-columns: 1fr; }
     .sidebar { display: none; }
+    .img { width: 200px; }
   }
   @media (max-width: 600px) {
     .post-info-grid { grid-template-columns: 1fr; }
+    .img { width: 250px; }
   }
