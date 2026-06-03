@@ -108,13 +108,13 @@
     }
     if (n === 1) {
       return `<div class="post-mosaic mosaic-1">
-        <img src="${imgs[0]}" alt="Foto do pet" loading="lazy" style="width: 510px;">
+        <img src="${imgs[0]}" class = "feed-img" alt="Foto do pet" loading="lazy">
       </div>`;
     }
     if (n === 2) {
       return `<div class="post-mosaic mosaic-2">
-        <img src="${imgs[0]}" alt="Foto 1" loading="lazy">
-        <img src="${imgs[1]}" alt="Foto 2" loading="lazy">
+        <img src="${imgs[0]}" class = "feed-img" alt="Foto 1" loading="lazy">
+        <img src="${imgs[1]}" class = "feed-img" alt="Foto 2" loading="lazy">
       </div>`;
     }
   }
