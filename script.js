@@ -86,7 +86,7 @@ window.removePhoto = removePhoto;
 async function uploadImage(file) {
   if (!file) return null;
 
-  // Convert the file to Base64 (ImgBB needs this format)
+  // Converter para base64
   const base64 = await new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result.split(',')[1]); // removes the "data:image/jpeg;base64," part
@@ -94,7 +94,7 @@ async function uploadImage(file) {
     reader.readAsDataURL(file);
   });
 
-  // Send to ImgBB
+  // Enviar para imgBB
   const formData = new FormData();
   formData.append('image', base64);
 
@@ -138,7 +138,7 @@ getPetData();
 // ──────────────────────────────────────────────
 function buildCardHTML(p) {
   return `
-    <div class="pet-card" onclick="showToast('Ver detalhes de ${p.nome}')">
+    <div class="pet-card" >
       <div class="pet-img">
         ${p.imageUrls && p.imageUrls.length > 0
           ? `<img src="${p.imageUrls[0]}" alt="${p.nome}" style="width:100%;height:100%;object-fit:cover;">`
@@ -229,7 +229,12 @@ async function cadastrar(event) {
   event.preventDefault();
   try {
     let imageUrls = [];
-    if (selectedFiles.length > 0) {
+
+    if (selectedFiles.length > 2) {
+      window.alert('Erro ao cadastrar pet. O máximo de imagens permitidas no feed é 2.');
+      return;
+    }
+    else if (selectedFiles.length > 0) {
       showToast('Fazendo upload das imagens...');
       imageUrls = await Promise.all(selectedFiles.map(file => uploadImage(file)));
     }

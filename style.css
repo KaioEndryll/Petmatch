@@ -98,8 +98,11 @@
     min-height: 92vh;
     display: flex;
     align-items: center;
-    padding: 80px 40px;
     overflow: hidden;
+    padding: 80px 40px;
+    flex-wrap: wrap;           
+    justify-content: space-between; 
+    gap: 2rem;                  
   }
 
   .hero-glow {
@@ -113,18 +116,25 @@
     pointer-events: none;
   }
 
-  .hero-glow-2 {
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--green-glow) 0%, transparent 70%);
-    bottom: -50px;
-    left: 200px;
-    pointer-events: none;
+  .hero-image {
+    flex: 1;
+    min-width: 280px; 
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .hero-image img {
+    width: 210px;
+    height: 200px;
+    min-width: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 1; 
   }
 
   .hero-content {
+    flex: 1;
     max-width: 680px;
     position: relative;
     z-index: 1;
@@ -947,6 +957,7 @@
     .feed-button{bottom: 80px;}
     .hero { padding: 60px 20px; flex-direction: column; }
     .hero-stats { position: static; transform: none; flex-direction: row; flex-wrap: wrap; margin-top: 40px; }
+    .hero-image { position: static; display: block;}
     section { padding: 60px 20px; }
     .form-grid { grid-template-columns: 1fr; }
     .ods-grid { grid-template-columns: 1fr; }

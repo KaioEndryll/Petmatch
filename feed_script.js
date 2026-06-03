@@ -1,7 +1,7 @@
   import { petsCollection, chatCollection } from './firebase.js';
   import { getDocs, addDoc, query, where, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js';
 
-  // ── Anonymous name generator ──────────────────────────────────────
+  // ── Gerador de perfil anonimo ──────────────────────────────────────
   const ANON_ANIMALS = ['🐶','🐱','🦊','🐻','🐼','🐨','🦁','🐯','🐸','🐺','🦝','🐮'];
 
   function createSession() {
@@ -10,23 +10,21 @@
       const emoji = ANON_ANIMALS[Math.floor(Math.random() * ANON_ANIMALS.length)];
       const num   = Math.floor(Math.random() * 900) + 100;
       s = JSON.stringify({ emoji, name: `Colaborador ${num}` });
-      localStorage.setItem('pm_session', s); // persist so same name is reused next visit
+      localStorage.setItem('pm_session', s);
     }
     return JSON.parse(s);
   }
   const ME = createSession();
 
-  // ── Chat helpers ───────────────────────────────────────────────────
+  // ── Chat ───────────────────────────────────────────────────
 
-  // Stores the Firestore unsubscribe functions so we don't create duplicate listeners
   const chatListeners = {};
 
   function formatTime(ts) {
     const d = new Date(ts);
-    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  // Renders messages directly from a data array (called by onSnapshot)
   function renderMessages(petId, msgs) {
     const container = document.getElementById(`chat-msgs-${petId}`);
     if (!container) return;
@@ -47,9 +45,8 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  // Starts a real-time listener for a pet's chat — auto-updates when new messages arrive
   function listenToChat(petId) {
-    if (chatListeners[petId]) return; // already listening, don't duplicate
+    if (chatListeners[petId]) return;
 
     const q = query(
       chatCollection,
@@ -73,13 +70,13 @@
     if (!text) return;
 
     input.value = '';
-    input.disabled = true; // prevent double-sends while saving
+    input.disabled = true;
 
     try {
       await addDoc(chatCollection, {
-        petId,             // which pet this message belongs to
-        emoji: ME.emoji,   // sender's anonymous emoji
-        name:  ME.name,    // sender's anonymous name e.g. "Colaborador 342"
+        petId,             
+        emoji: ME.emoji,   // emoji aleatorio
+        name:  ME.name,    // nome anonimo ex: "Colaborador 342"
         text,
         ts: Date.now()
       });
@@ -91,7 +88,7 @@
       input.disabled = false;
       input.focus();
     }
-    // No need to call renderMessages manually — onSnapshot fires automatically
+
   };
 
   window.handleChatKey = function(event, petId) {
@@ -101,7 +98,7 @@
     }
   };
 
-  // ── Image Mosaic builder ───────────────────────────────────────────
+  // ── Mosaico  ───────────────────────────────────────────
   function buildMosaic(imageUrls, emoji) {
     const imgs = (imageUrls || []).filter(Boolean);
     const n = imgs.length;
@@ -111,7 +108,7 @@
     }
     if (n === 1) {
       return `<div class="post-mosaic mosaic-1">
-        <img src="${imgs[0]}" alt="Foto do pet" loading="lazy">
+        <img src="${imgs[0]}" alt="Foto do pet" loading="lazy" style="width: 510px;">
       </div>`;
     }
     if (n === 2) {
@@ -120,24 +117,6 @@
         <img src="${imgs[1]}" alt="Foto 2" loading="lazy">
       </div>`;
     }
-    if (n === 3) {
-      return `<div class="post-mosaic mosaic-3">
-        <img src="${imgs[0]}" alt="Foto 1" loading="lazy">
-        <img src="${imgs[1]}" alt="Foto 2" loading="lazy">
-        <img src="${imgs[2]}" alt="Foto 3" loading="lazy">
-      </div>`;
-    }
-    // 4+
-    const extra = n - 4;
-    return `<div class="post-mosaic mosaic-4plus">
-      <img src="${imgs[0]}" alt="Foto 1" loading="lazy">
-      <img src="${imgs[1]}" alt="Foto 2" loading="lazy">
-      <img src="${imgs[2]}" alt="Foto 3" loading="lazy">
-      <div class="${extra > 0 ? 'mosaic-more' : ''}">
-        <img src="${imgs[3]}" alt="Foto 4" loading="lazy">
-        ${extra > 0 ? `<div class="mosaic-more-overlay">+${extra}</div>` : ''}
-      </div>
-    </div>`;
   }
 
   // ── Post builder ───────────────────────────────────────────────────
@@ -148,6 +127,12 @@
     if (diff === 0) return 'Hoje';
     if (diff === 1) return 'Ontem';
     return `${diff} dias atrás`;
+  }
+
+  function formatDate(dateStr) {
+    const d    = new Date(dateStr);
+    const formattedDate = d.toLocaleDateString('default', {year: 'numeric', month: '2-digit', day: '2-digit'});
+    return formattedDate;
   }
 
   function formatReward(v) {
@@ -188,7 +173,7 @@
           <div class="post-tags" style="margin-top:10px;">
             <span class="post-tag">🐾 ${p.especie}</span>
             <span class="post-tag">${p.raca || 'SRD'}</span>
-            <span class="post-tag">📅 ${p.ultimaData || ''}</span>
+            <span class="post-tag">📅 ${formatDate(p.ultimaData) || ''}</span>
           </div>
         </div>
 
@@ -200,7 +185,7 @@
           </div>
           <div class="post-info-item">
             <span class="post-info-label">Desapareceu em</span>
-            <span class="post-info-value">📅 ${p.ultimaData || '—'}</span>
+            <span class="post-info-value">📅 ${formatDate(p.ultimaData) || '—'}</span>
           </div>
           <div class="post-info-item">
             <span class="post-info-label">Espécie</span>
@@ -258,21 +243,17 @@
 
   function renderPosts(arr) {
     const container = document.getElementById('posts-container');
-    // Only show "perdido"
+    // Mostra apenas os animais perdidos no feed
     const perdidos = arr.filter(p => p.status !== 'encontrado');
     if (perdidos.length === 0) {
       container.innerHTML = `<div class="loading-state">🐾 Nenhum pet perdido neste filtro.</div>`;
       return;
     }
     container.innerHTML = perdidos.map(buildPost).join('');
-    // Render chats and apply liked states
+    // Render chat
     perdidos.forEach(p => {
-      listenToChat(p.id); // start real-time Firestore listener for this pet's chat
-      if (likedPosts.has(p.id)) {
-        const btn = document.getElementById(`like-btn-${p.id}`);
-        if (btn) { btn.classList.add('liked'); btn.textContent = '❤️ Curtido'; }
-      }
-    });
+      listenToChat(p.id);
+      });
   }
 
   window.quickFilter = function(tipo, el) {
@@ -311,7 +292,6 @@
       : `<div style="font-size:13px;color:var(--muted);">Nenhum alerta.</div>`;
   }
 
-  // ── Toast ──────────────────────────────────────────────────────────
   let toastT;
   window.toast = function(msg) {
     const el = document.getElementById('fb-toast');
@@ -321,7 +301,7 @@
     toastT = setTimeout(() => el.classList.remove('show'), 3000);
   };
 
-  // ── Load from Firebase ─────────────────────────────────────────────
+  // ── Load Firebase ─────────────────────────────────────────────
   async function loadPets() {
     try {
       const snap = await getDocs(petsCollection);
